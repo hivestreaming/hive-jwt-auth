@@ -1,0 +1,35 @@
+# For use on sequencediagram.org
+
+title Hive JWT Authentication
+
+participant Partner Platform
+participant Viewer Page
+participant Hive Services
+
+group #2f2e7b Publish Public Key #white
+space
+activate Partner Platform
+Partner Platform->Hive Services:Publish Public Key
+activate Hive Services
+Hive Services->Hive Services: Store Public Key
+deactivate Hive Services
+deactivate Partner Platform
+end
+
+space
+group #2f2e7b Video Playback #white
+space
+activate Partner Platform
+Partner Platform->Partner Platform:Create Signed JWT
+activate Viewer Page
+Viewer Page->Partner Platform: Get Signed JWT
+Viewer Page<--Partner Platform: Signed JWT
+deactivate Partner Platform
+group #green Authorization via Plugin.initSession #white
+Viewer Page->Hive Services: Authenticate via Signed JWT
+Hive Services->Hive Services:Validate JWT
+Hive Services-->Viewer Page:Returned validated info\n(Manifest, License, ...)
+end
+Viewer Page->Viewer Page: Play from HiveSession details
+deactivate Viewer Page
+end

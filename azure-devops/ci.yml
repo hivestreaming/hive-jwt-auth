@@ -1,0 +1,13 @@
+trigger: none
+
+pr:
+  branches:
+    include:
+      - master
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - template: templates/install.yml
+  - template: templates/build.yml

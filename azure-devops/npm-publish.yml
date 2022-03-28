@@ -1,0 +1,23 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - template: templates/install.yml
+  - task: Npm@1
+    displayName: NPM Publish
+    inputs:
+      command: publish
+      verbose: true
+      publishEndpoint: npm registry
+      workingDir: nodejs
+  - task: Npm@1
+    displayName: NPM Access
+    inputs:
+      command: custom
+      customCommand: access public
+      verbose: true
+      publishEndpoint: npm registry
+      workingDir: nodejs
