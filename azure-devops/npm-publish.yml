@@ -7,10 +7,9 @@ pool:
 steps:
   - template: templates/install.yml
   - task: Npm@1
-    displayName: NPM Access
+    displayName: NPM Publish
     inputs:
-      command: custom
-      customCommand: access public
+      command: publish
       verbose: true
-      customEndpoint: npm registry
+      publishEndpoint: npm registry
       workingDir: nodejs
