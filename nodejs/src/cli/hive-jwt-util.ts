@@ -107,7 +107,17 @@ type CreateJwtArguments = {
     manifest: string[];
 }
 
-Yargs(process.argv.slice(2))
+type ReportingUrlArguments = {
+    file: string;
+    partnerId: string;
+    customerId: string;
+    keyId: string;
+    expiresIn: string;
+    videoId: string;
+    endpoint: string;
+}
+
+const cli = Yargs(process.argv.slice(2))
     .command({
         command: 'create-key',
         describe: 'Create a new private key',
@@ -183,6 +193,64 @@ Yargs(process.argv.slice(2))
         })
     })
     .command({
+        command: 'reporting-url',
+        describe: 'Display a URL to Hive Video Monitor',
+        builder: (yargs) => {
+            return yargs
+            .option('file', {
+                describe: 'File to read PEM-encoded private key',
+                alias: 'f',
+                type: 'string',
+                required: true
+            }).option('partnerId', {
+                describe: 'Partner Id',
+                alias: 'p',
+                type: 'string',
+                required: true
+            }).option('customerId', {
+                describe: 'Customer Id',
+                alias: 'c',
+                type: 'string',
+                required: true
+            }).option('keyId', {
+                describe: 'Key Id',
+                alias: 'k',
+                type: 'string',
+                required: true
+            })
+            .option('videoId', {
+                describe: 'Video Id',
+                alias: 'v',
+                type: 'string',
+                required: true
+            })
+            .option('endpoint', {
+                describe: 'Endpoint where to publish key',
+                alias: 'e',
+                type: 'string',
+                choices: ['test', 'prod'],
+                default: 'test'
+            }).option('expiresIn', {
+                describe: 'Expiration, as either (a) number of seconds or (b) a duration string, eg. "3 days"',
+                alias: 'x',
+                type: 'string',
+                required: true
+            }).check((argv) => {
+                checkExpiresIn(argv.expiresIn);
+                checkEndpoint(argv.endpoint);
+                return argv;
+            });
+        },
+        handler: createHandler(async (argv: ArgumentsCamelCase<ReportingUrlArguments>) => {
+            const { partnerId, file, keyId, customerId, videoId, endpoint, expiresIn } = argv;
+            const exp = checkExpiresIn(expiresIn);
+            const jwtCreator = await HiveJwtCreator.create(partnerId, file);
+            const url = jwtCreator.signReporting(keyId, customerId, videoId, exp, checkEndpoint(endpoint))
+            console.log(url);
+        })
+    });
+
+cli.command({
         command: 'list-keys',
         describe: 'List public keys on Hive API',
         builder: (yargs) => {
@@ -283,8 +351,9 @@ Yargs(process.argv.slice(2))
             await client.delete(keyId);
             console.log(`Deleted key: ${partnerId}/${keyId}`);
         })
-    })
-    .command({
+    });
+
+cli.command({
         command: 'publish-key',
         describe: 'Publish a public key to Hive API',
         builder: (yargs) => {
@@ -335,7 +404,8 @@ Yargs(process.argv.slice(2))
             })
             console.log(`Created key: ${partnerId}/${keyId}`);
         })
-    })
-    .help()
+    });
+
+cli.help()
     .demandCommand()
     .argv;
