@@ -33,7 +33,6 @@ await keyPair.writePrivateKey(file);
 
 ### Creating a new JWT
 ```ts
-const { partnerId, file, keyId, customerId, videoId, manifest, expiresIn } = argv;
 const partnerId = '9001'; // Partner Id
 const file = 'path/private-key.pem'; // File to read PEM-encoded private key
 const keyId = 'key-id'; // Key Id
@@ -45,6 +44,21 @@ const jwtCreator = await HiveJwtCreator.create(partnerId, file);
 const jwt = jwtCreator.sign(keyId, customerId, videoId, manifests, expiresIn)
 
 console.log(jwt);
+```
+
+### Creating a Reporting URL to link to Video Monitor
+```ts
+const partnerId = '9001'; // Parnter Id
+const file = 'path/private-key.pem'; // File to read PEM-encoded private key
+const keyId = 'key-id'; // Key Id
+const customerId = 'customer-id'; // Customer Id
+const videoId = 'video-id'; // Event/Video Id
+const endpoint = 'prod'; // Endpoint: 'test' or 'prod'. Default if none provided: 'prod'
+const expiresIn = '15 minutes'; // Expires in. See documentation of `HiveJwtCreator#signReporting` for format details.
+const jwtCreator = await HiveJwtCreator.create(partnerId, file);
+const url = jwtCreator.signReporting(keyId, customerId, videoId, expiresIn, endpoint);
+
+console.log(url);
 ```
 
 ### Publishing a new Public Key to Hive API
@@ -107,12 +121,13 @@ Public Key Service. The tool also creates JWTs using these public keys.
 hive-jwt-util <command>
 
 Commands:
-  hive-jwt-util create-key   Create a new private key
-  hive-jwt-util create-jwt   Create a new signed JWT
-  hive-jwt-util list-keys    List public keys on Hive API
-  hive-jwt-util get-key      Get a public key on Hive API
-  hive-jwt-util delete-key   Delete a public key on Hive API
-  hive-jwt-util publish-key  Publish a public key to Hive API
+  hive-jwt-util create-key     Create a new private key
+  hive-jwt-util create-jwt     Create a new signed JWT
+  hive-jwt-util reporting-url  Display a URL to Hive Video Monitor
+  hive-jwt-util list-keys      List public keys on Hive API
+  hive-jwt-util get-key        Get a public key on Hive API
+  hive-jwt-util delete-key     Delete a public key on Hive API
+  hive-jwt-util publish-key    Publish a public key to Hive API
 
 Options:
   --version  Show version number                                       [boolean]
@@ -162,7 +177,33 @@ Options:
 #### Example
 
 ```text
-hive-jwt-util create-key --file private-key.pem --partnerId 9001 --customerId 15 --videoId video-id --manifest https://www.example.com/manifest.m3u8 --expiresIn "15 minutes"
+hive-jwt-util create-jwt --file private-key.pem --partnerId 9001 --customerId 15 --videoId video-id --keyId key-id --manifest https://www.example.com/manifest.m3u8 --expiresIn "15 minutes"
+```
+
+### `reporting-url`
+Display a URL to Hive Video Monitor
+
+```text
+hive-jwt-util reporting-url
+
+Options:
+      --version     Show version number                                [boolean]
+      --help        Show help                                          [boolean]
+  -f, --file        File to read PEM-encoded private key     [string] [required]
+  -p, --partnerId   Partner Id                               [string] [required]
+  -c, --customerId  Customer Id                              [string] [required]
+  -k, --keyId       Key Id                                   [string] [required]
+  -v, --videoId     Video Id                                 [string] [required]
+  -e, --endpoint    Endpoint where to publish key
+                            [string] [choices: "test", "prod"] [default: "test"]
+  -x, --expiresIn   Expiration, as either (a) number of seconds or (b) a
+                    duration string, eg. "3 days"            [string] [required]
+```
+
+#### Example
+
+```text
+hive-jwt-util reporting-url --file private-key.pem --keyId key-id --partnerId 9001 --customerId 15 --videoId video-id --expiresIn "15 minutes"
 ```
 
 ### `list-keys`
@@ -176,7 +217,7 @@ Options:
       --help            Show help                                      [boolean]
   -p, --partnerId       Partner Id                           [string] [required]
   -e, --endpoint        Endpoint where to publish key
-                            [string] [choices: "test", "prod"] [default: "prod"]
+                            [string] [choices: "test", "prod"] [default: "test"]
   -d, --includeDeleted  Include deleted keys in list response
                                                       [boolean] [default: false]
 ```
@@ -198,14 +239,14 @@ Options:
       --help       Show help                                           [boolean]
   -p, --partnerId  Partner Id                                [string] [required]
   -e, --endpoint   Endpoint where to publish key
-                            [string] [choices: "test", "prod"] [default: "prod"]
+                            [string] [choices: "test", "prod"] [default: "test"]
   -k, --keyId      Key Id                                    [string] [required]
 ```
 
 #### Example:
 
 ```text
-hive-jwt-util list-keys --partnerId 9001 --keyId my-key
+hive-jwt-util get-key --partnerId 9001 --keyId my-key
 ```
 
 ### `delete-key`
@@ -219,7 +260,7 @@ Options:
       --help       Show help                                           [boolean]
   -p, --partnerId  Partner Id                                [string] [required]
   -e, --endpoint   Endpoint where to publish key
-                            [string] [choices: "test", "prod"] [default: "prod"]
+                            [string] [choices: "test", "prod"] [default: "test"]
   -k, --keyId      Key Id                                    [string] [required]
 ```
 
@@ -245,7 +286,7 @@ Options:
                     since 1 January 1970 00:00:00 UTC or (b) a duration string,
                     eg. "3 days"                             [string] [required]
   -e, --endpoint    Endpoint where to publish key
-                            [string] [choices: "test", "prod"] [default: "prod"]
+                            [string] [choices: "test", "prod"] [default: "test"]
 ```
 
 #### Example:
@@ -253,4 +294,3 @@ Options:
 ```text
 hive-jwt-util publish-key --file private-key.pem --partnerId 9001 --keyId my-key --expiration "1 day"
 ```
-
