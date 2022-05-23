@@ -79,4 +79,33 @@ export default class HiveJwtCreator {
 
         return token;
     }
+
+    /**
+     * Create a new JWT.
+     * @param {string} keyId Key Id
+     * @param {string} customerId Customer Id
+     * @param {string} videoId Video Id (also known as Content Id).
+     * @param {string | number} expiresIn Expires in, expressed in seconds or a
+     * string describing a time span [zeit/ms](https://github.com/zeit/ms.js).
+     * Eg: 60, "2 days", "10h", "7d"
+     * @param {'test' | 'prod'} endpoint Endpoint in URL.
+     */
+     signReporting(keyId: string, customerId: string, videoId: string, expiresIn: string | number, endpoint: 'test' | 'prod' = 'prod') {
+        const data = {
+            "iss": this.partnerId,
+            "sub": videoId,
+            "ver": "1.0",
+            "aud": "https://hivestreaming.com",
+            "cid": customerId,
+            "act": "reporting"
+        };
+
+        const token = sign(data, this.privateKey, {
+            algorithm: 'RS256',
+            keyid: keyId,
+            expiresIn
+        });
+
+        return `https://api${endpoint === 'prod' ? '' : '-' + endpoint}.hivestreaming.com/v1/url-redirect/adminportal-jwt/${token}`;
+    }
 }
