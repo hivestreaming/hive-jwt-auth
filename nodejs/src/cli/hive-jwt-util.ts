@@ -105,6 +105,7 @@ type CreateJwtArguments = {
     expiresIn: string;
     videoId: string;
     manifest: string[];
+    eventName?: string;
 }
 
 type ReportingUrlArguments = {
@@ -179,16 +180,21 @@ const cli = Yargs(process.argv.slice(2))
                 alias: 'x',
                 type: 'string',
                 required: true
+            }).option('eventName', {
+                describe: 'Event name',
+                alias: 'n',
+                type: 'string',
+                required: false
             }).check((argv) => {
                 checkExpiresIn(argv.expiresIn);
                 return argv;
             });
         },
         handler: createHandler(async (argv: ArgumentsCamelCase<CreateJwtArguments>) => {
-            const { partnerId, file, keyId, customerId, videoId, manifest, expiresIn } = argv;
+            const { partnerId, file, keyId, customerId, videoId, manifest, expiresIn, eventName } = argv;
             const exp = checkExpiresIn(expiresIn);
             const jwtCreator = await HiveJwtCreator.create(partnerId, file);
-            const jwt = jwtCreator.sign(keyId, customerId, videoId, manifest, exp)
+            const jwt = jwtCreator.sign(keyId, customerId, videoId, manifest, exp, eventName)
             console.log(jwt);
         })
     })
