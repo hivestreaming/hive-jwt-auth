@@ -60,14 +60,16 @@ export default class HiveJwtCreator {
      * @param {string | number} expiresIn Expires in, expressed in seconds or a
      * string describing a time span [zeit/ms](https://github.com/zeit/ms.js).
      * Eg: 60, "2 days", "10h", "7d"
+     * @param {string} eventName Event name
      */
-    sign(keyId: string, customerId: string, videoId: string, manifests: string[], expiresIn: string | number) {
+    sign(keyId: string, customerId: string, videoId: string, manifests: string[], expiresIn: string | number, eventName?: string) {
         const data = {
             "iss": this.partnerId,
             "sub": videoId,
             "ver": "1.0",
             "aud": "https://hivestreaming.com",
             "cid": customerId,
+            "evn": eventName,
             "man": manifests
         };
 
