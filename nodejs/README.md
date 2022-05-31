@@ -40,8 +40,9 @@ const customerId = 'customer-id'; // Customer Id
 const videoId = 'video-id'; // Event/Video Id
 const manifests = [ 'https://example.com/manifest.m3u8', 'https://www.example.com/manifest.mpd' ] // Manifests
 const expiresIn = '15 minutes'; // Expires in. See documentation of `HiveJwtCreator#sign` for format details.
+const eventName = 'event test name' // Event name
 const jwtCreator = await HiveJwtCreator.create(partnerId, file);
-const jwt = jwtCreator.sign(keyId, customerId, videoId, manifests, expiresIn)
+const jwt = jwtCreator.sign(keyId, customerId, videoId, manifests, expiresIn, eventName)
 
 console.log(jwt);
 ```
@@ -171,13 +172,14 @@ Options:
   -v, --videoId     Video Id                                 [string] [required]
   -m, --manifest    Manifest                                  [array] [required]
   -x, --expiresIn   Expiration, as either (a) number of seconds or (b) a
+  -n, --eventName   Event name                               [string] [optional]
                     duration string, eg. "3 days"            [string] [required]
 ```
 
 #### Example
 
 ```text
-hive-jwt-util create-jwt --file private-key.pem --partnerId 9001 --customerId 15 --videoId video-id --keyId key-id --manifest https://www.example.com/manifest.m3u8 --expiresIn "15 minutes"
+hive-jwt-util create-jwt --file private-key.pem --partnerId 9001 --customerId 15 --videoId video-id --keyId key-id --manifest https://www.example.com/manifest.m3u8 --expiresIn "15 minutes" -n "event test name"
 ```
 
 ### `reporting-url`
