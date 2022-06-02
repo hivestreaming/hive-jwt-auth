@@ -1,6 +1,6 @@
 {
   "name": "@hivestreaming/hive-jwt-auth",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Reference implementation for using JWT authorization with Hive",
   "main": "./dist/lib/index.js",
   "bin": {
