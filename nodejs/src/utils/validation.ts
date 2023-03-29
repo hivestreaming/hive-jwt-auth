@@ -41,7 +41,6 @@ const checkExpiresIn = (expiration: string) => {
 }
 
 const checkManifestOrArray = (manifest: string[], regexes?: string[]) => {
-    console.log(manifest.length, regexes?.length)
     if(manifest.length === 0 && regexes && regexes.length > 0) return { "man": manifest, "regexes": regexes };
     if(manifest.length > 0 && !regexes) return { "man": manifest };
     throw new Error("Only one of manifest or regex list can be defined.")
