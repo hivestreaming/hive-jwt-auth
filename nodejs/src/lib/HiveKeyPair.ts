@@ -8,7 +8,7 @@ import readFile = fsPromises.readFile;
 const generateKeyPair = promisify(_generateKeyPair);
 
 /**
- * Helper class to generate and store RSA assymetric keys.
+ * Helper class to generate and store RSA asymmetric keys.
  */
 export default class HiveKeyPair {
     /** Public key */
@@ -33,7 +33,7 @@ export default class HiveKeyPair {
      */
     static async create(): Promise<HiveKeyPair> {
         const { publicKey, privateKey } = await generateKeyPair('rsa', {
-            modulusLength: 4096
+            modulusLength: 3072
         });
 
         return new HiveKeyPair(publicKey, privateKey);
@@ -45,7 +45,7 @@ export default class HiveKeyPair {
      */
     static createSync(): HiveKeyPair {
         const { publicKey, privateKey } = generateKeyPairSync('rsa', {
-            modulusLength: 4096
+            modulusLength: 3072
         });
 
         return new HiveKeyPair(publicKey, privateKey);

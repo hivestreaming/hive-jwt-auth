@@ -37,7 +37,7 @@ export default class HiveJwtCreator {
     }
 
     /**
-     * Synchronously onstruct a new `HiveJwtCreator` given a private key
+     * Synchronously construct a new `HiveJwtCreator` given a private key
      * filename. An error reading the file will bubble to caller.
      * @param {string} partnerId Partner Id
      * @param {string} privateKeyFilename Private key filename

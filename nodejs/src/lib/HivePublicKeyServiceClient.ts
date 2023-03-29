@@ -12,7 +12,7 @@ export type PublicKeyStorePayload = {
     /** Public key exponent */
     exponent: string;
 
-    /** Public key odulus */
+    /** Public key modulus */
     modulus: string;
 
     /** Expiration as a timestamp representing seconds since 1 January 1970
