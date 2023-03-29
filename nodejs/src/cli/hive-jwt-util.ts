@@ -1,60 +1,18 @@
 #!/usr/bin/env node
 
-import ms from 'ms';
 import { inspect } from 'util';
 import Yargs, { ArgumentsCamelCase } from 'yargs';
+import {
+    checkPartnerToken,
+    checkExpiration,
+    checkExpiresIn,
+    checkEndpoint
+} from '../utils/validation';
 import HiveKeyPair from '../lib/HiveKeyPair';
 import HiveJwtCreator from '../lib/HiveJwtCreator';
 import HivePublicKeyServiceClient from '../lib/HivePublicKeyServiceClient';
 
 const { HIVE_PARTNER_TOKEN } = process.env;
-
-const checkPartnerToken = () => {
-    if (HIVE_PARTNER_TOKEN === undefined || HIVE_PARTNER_TOKEN == '') {
-        throw new Error("No HIVE_PARTNER_TOKEN environmental variable set")
-    }
-}
-
-const isNumeric = (value: string) => /^\d+$/.test(value);
-
-const checkExpiration = (expiration: string) => {
-    let exp: number;
-
-    if (isNumeric(expiration)) {
-        exp = parseInt(expiration, 10);
-    } else {
-        exp = Math.floor((Date.now() + ms(expiration)) / 1000)
-    }
-
-    if (isNaN(exp)) {
-        throw new Error(`Invalid expiration: ${expiration}`)
-    }
-
-    return exp;
-}
-
-const checkExpiresIn = (expiration: string) => {
-    let exp: number;
-
-    if (isNumeric(expiration)) {
-        exp = parseInt(expiration, 10);
-    } else {
-        exp = Math.floor(ms(expiration) / 1000);
-    }
-
-    if (isNaN(exp)) {
-        throw new Error(`Invalid expiresIn: ${expiration}`)
-    }
-
-    return exp;
-}
-
-const checkEndpoint = (endpoint: string): 'prod'|'test' => {
-    if (endpoint === 'prod' || endpoint === 'test') {
-        return endpoint;
-    }
-    throw new Error(`Invalid endpoint: ${endpoint}`);
-}
 
 const createHandler = <U>(handler: (args: ArgumentsCamelCase<U>) => void | Promise<void>): typeof handler => {
     return async (args: ArgumentsCamelCase<U>) => {
@@ -106,6 +64,7 @@ type CreateJwtArguments = {
     videoId: string;
     manifest: string[];
     eventName?: string;
+    regexes?: string[];
 }
 
 type ReportingUrlArguments = {
@@ -174,7 +133,8 @@ const cli = Yargs(process.argv.slice(2))
                 type: 'string',
                 alias: 'm',
                 array: true,
-                required: true
+                required: true,
+                default: []
             }).option('expiresIn', {
                 describe: 'Expiration, as either (a) number of seconds or (b) a duration string, eg. "3 days"',
                 alias: 'x',
@@ -185,16 +145,21 @@ const cli = Yargs(process.argv.slice(2))
                 alias: 'n',
                 type: 'string',
                 required: false
+            }).option('regexes', {
+                describe: 'Array of regexes',
+                alias: 'r',
+                type: 'string',
+                array: true,
+                required: false
             }).check((argv) => {
                 checkExpiresIn(argv.expiresIn);
                 return argv;
             });
         },
         handler: createHandler(async (argv: ArgumentsCamelCase<CreateJwtArguments>) => {
-            const { partnerId, file, keyId, customerId, videoId, manifest, expiresIn, eventName } = argv;
-            const exp = checkExpiresIn(expiresIn);
+            const { partnerId, file, keyId, customerId, videoId, manifest, expiresIn, eventName, regexes } = argv;
             const jwtCreator = await HiveJwtCreator.create(partnerId, file);
-            const jwt = jwtCreator.sign(keyId, customerId, videoId, manifest, exp, eventName)
+            const jwt = jwtCreator.sign(keyId, customerId, videoId, manifest, expiresIn, eventName, regexes)
             console.log(jwt);
         })
     })
@@ -279,7 +244,7 @@ cli.command({
             }).check((argv) => {
                 const { endpoint } = argv;
                 checkEndpoint(endpoint);
-                checkPartnerToken();
+                checkPartnerToken(HIVE_PARTNER_TOKEN);
                 return argv;
             });
         },
@@ -313,7 +278,7 @@ cli.command({
             }).check((argv) => {
                 const { endpoint } = argv;
                 checkEndpoint(endpoint);
-                checkPartnerToken();
+                checkPartnerToken(HIVE_PARTNER_TOKEN);
                 return argv;
             });
         },
@@ -347,7 +312,7 @@ cli.command({
             }).check((argv) => {
                 const { endpoint } = argv;
                 checkEndpoint(endpoint);
-                checkPartnerToken();
+                checkPartnerToken(HIVE_PARTNER_TOKEN);
                 return argv;
             });
         },
@@ -392,7 +357,7 @@ cli.command({
             }).check((argv) => {
                 const { endpoint } = argv;
                 checkEndpoint(endpoint);
-                checkPartnerToken();
+                checkPartnerToken(HIVE_PARTNER_TOKEN);
                 checkExpiration(argv.expiration);
                 return argv;
             });
@@ -402,12 +367,13 @@ cli.command({
             const client = new HivePublicKeyServiceClient(partnerId, HIVE_PARTNER_TOKEN!, checkEndpoint(endpoint));
             const keyPair = await HiveKeyPair.readFromFile(file);
             const publicKey = keyPair.exportPublicKey();
-            await client.create({
+            await client.create(
                 partnerId,
-                expiration: checkExpiration(expiration),
                 keyId,
-                ...publicKey
-            })
+                publicKey.exponent,
+                publicKey.modulus,
+                expiration
+            )
             console.log(`Created key: ${partnerId}/${keyId}`);
         })
     });

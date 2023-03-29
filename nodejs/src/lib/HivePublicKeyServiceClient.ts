@@ -1,4 +1,5 @@
 import axios, { Axios } from 'axios';
+import { checkExpiration } from '../utils/validation';
 
 /** A type representing the JSON payload to create a new public key on the Hive
  * Public Key Service. */
@@ -115,7 +116,7 @@ export default class HivePublicKeyServiceClient {
      * @param endpoint The endpoint (`test` or `prod`) to send requests to
      */
     constructor(partnerId: string, partnerToken: string, endpoint: 'prod' | 'test' = 'prod') {
-        const baseURL = `https://api${endpoint === 'prod' ? '' : `-${endpoint}`}.hivestreaming.com/v1`
+        const baseURL = `https://api${endpoint === 'prod' ? '' : `-${endpoint}`}.hivestreaming.com/v1`;
 
         this.partnerId = partnerId;
         this.client = axios.create({
@@ -165,11 +166,20 @@ export default class HivePublicKeyServiceClient {
      *
      * @param info The public key to store on the Hive Public Key Service.
      */
-    async create(info: PublicKeyStorePayload): Promise<void> {
+    async create(partnerId: string, keyId: string, exponent: string, modulus: string, expiration: string | number): Promise<void> {
+        let a: PublicKeyStorePayload
         try {
-            await this.client.post('/publickey', info);
+            const exp = typeof expiration === "string" ? checkExpiration(expiration) : expiration;
+            const payload: PublicKeyStorePayload = {
+                partnerId,
+                keyId,
+                exponent,
+                modulus,
+                expiration: exp
+            }
+            await this.client.post('/publickey', payload);
         } catch (error) {
-            this.axiosErrorHandler(error, info.keyId);
+            this.axiosErrorHandler(error, keyId);
         }
     }
 

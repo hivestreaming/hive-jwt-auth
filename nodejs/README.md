@@ -31,23 +31,71 @@ const keyPair = await HiveKeyPair.create();
 await keyPair.writePrivateKey(file);
 ```
 
+### Publishing a new Public Key to Hive API
+
+```ts
+const partnerId = '9001'; // Partner Id
+const keyId = 'key-id'; // Key Id
+const partnerToken = 'foobar'; // Partner Token
+const endpoint = 'prod'; // Endpoint: 'test' or 'prod'. Default if none provided: 'prod'
+const expiration = '30 days'; // Expiration. See documentation of `HivePublicKeyServiceClient#create` for format details.
+
+const keyPair = await HiveKeyPair.readFromFile(file);
+const publicKey = keyPair.exportPublicKey();
+
+const client = new HivePublicKeyServiceClient(
+  partnerId,
+  partnerToken,
+  endpoint
+);
+
+await client.create({
+  partnerId,
+  expiration,
+  keyId,
+  ...publicKey,
+});
+```
+
 ### Creating a new JWT
+
+#### Using a manifest list:
+
 ```ts
 const partnerId = '9001'; // Partner Id
 const file = 'path/private-key.pem'; // File to read PEM-encoded private key
 const keyId = 'key-id'; // Key Id
 const customerId = 'customer-id'; // Customer Id
 const videoId = 'video-id'; // Event/Video Id
-const manifests = [ 'https://example.com/manifest.m3u8', 'https://www.example.com/manifest.mpd' ] // Manifests
+const manifests = ['https://example.com/manifest.m3u8','https://www.example.com/manifest.mpd']; // Manifests
 const expiresIn = '15 minutes'; // Expires in. See documentation of `HiveJwtCreator#sign` for format details.
-const eventName = 'event test name' // Event name
+const eventName = 'event test name'; // Event name
 const jwtCreator = await HiveJwtCreator.create(partnerId, file);
-const jwt = jwtCreator.sign(keyId, customerId, videoId, manifests, expiresIn, eventName)
+const jwt = jwtCreator.sign(keyId, customerId, videoId, manifests, expiresIn, eventName);
+
+console.log(jwt);
+```
+
+#### Using a regex:
+
+```ts
+const partnerId = '9001'; // Partner Id
+const file = 'path/private-key.pem'; // File to read PEM-encoded private key
+const keyId = 'key-id'; // Key Id
+const customerId = 'customer-id'; // Customer Id
+const videoId = 'video-id'; // Event/Video Id
+const manifests = []; // Manifests -- must be empty
+const regexes = ['your regex here']; // Must include a capturing group
+const expiresIn = '15 minutes'; // Expires in. See documentation of `HiveJwtCreator#sign` for format details.
+const eventName = 'event test name'; // Event name
+const jwtCreator = await HiveJwtCreator.create(partnerId, file);
+const jwt = jwtCreator.sign(keyId, customerId, videoId, manifests, expiresIn, eventName, regexes);
 
 console.log(jwt);
 ```
 
 ### Creating a Reporting URL to link to Video Monitor
+
 ```ts
 const partnerId = '9001'; // Parnter Id
 const file = 'path/private-key.pem'; // File to read PEM-encoded private key
@@ -57,42 +105,25 @@ const videoId = 'video-id'; // Event/Video Id
 const endpoint = 'prod'; // Endpoint: 'test' or 'prod'. Default if none provided: 'prod'
 const expiresIn = '15 minutes'; // Expires in. See documentation of `HiveJwtCreator#signReporting` for format details.
 const jwtCreator = await HiveJwtCreator.create(partnerId, file);
-const url = jwtCreator.signReporting(keyId, customerId, videoId, expiresIn, endpoint);
+const url = jwtCreator.signReporting(keyId,customerId,videoId,expiresIn,endpoint
+);
 
 console.log(url);
 ```
 
-### Publishing a new Public Key to Hive API
-```ts
-const partnerId = '9001'; // Partner Id
-const partnerToken = 'foobar'; // Partner Token
-const endpoint = 'prod'; // Endpoint: 'test' or 'prod'. Default if none provided: 'prod'
-const expiration = '30 days'; // Expiration. See documentation of `HivePublicKeyServiceClient#create` for format details.
-
-const keyPair = await HiveKeyPair.readFromFile(file);
-const publicKey = keyPair.exportPublicKey();
-
-const client = new HivePublicKeyServiceClient(partnerId, partnerToken, endpoint);
-
-await client.create({
-    partnerId,
-    expiration,
-    keyId,
-    ...publicKey
-})
-```
-
 ### Deleting a Public Key from Hive API
+
 ```ts
-const partnerId = '9001'; // Partner Id
-const partnerToken = 'foobar'; // Partner Token
-const endpoint = 'prod'; // Endpoint: 'test' or 'prod'. Default if none provided: 'prod'
+const partnerId = "9001"; // Partner Id
+const partnerToken = "foobar"; // Partner Token
+const endpoint = "prod"; // Endpoint: 'test' or 'prod'. Default if none provided: 'prod'
 const client = new HivePublicKeyServiceClient(partnerId, partnerToken, endpoint);
 
 await client.delete(keyId);
 ```
 
 ### Listing Public Keys on Hive API
+
 ```ts
 const partnerId = '9001'; // Partner Id
 const partnerToken = 'foobar'; // Partner Token
@@ -104,6 +135,7 @@ await client.list(includeDeleted);
 ```
 
 ### Retrieving a Public Key on Hive API
+
 ```ts
 const partnerId = '9001'; // Partner Id
 const partnerToken = 'foobar'; // Partner Token
@@ -115,6 +147,7 @@ await client.get(keyId);
 ```
 
 ## Usage: CLI Tool
+
 This package provides a command-line tool to manage public keys on the Hive
 Public Key Service. The tool also creates JWTs using these public keys.
 
@@ -133,14 +166,15 @@ Commands:
 Options:
   --version  Show version number                                       [boolean]
   --help     Show help
-  ```
+```
 
-***IMPORTANT*** Commands that interact with the Hive API (`list-keys`,
+**_IMPORTANT_** Commands that interact with the Hive API (`list-keys`,
 `get-key`, `delete-key`, `publish-key`) require an environmental variable
 `HIVE_PARTNER_TOKEN` that contains the Hive Partner Token used for
 authenticating to Hive Services.
 
 ### `create-key`
+
 Create a new PEM-encoded RSA private key on the filesystem in `<file>`.
 
 ```text
@@ -158,6 +192,7 @@ hive-jwt-util create-key --file private-key.pem
 ```
 
 ### `create-jwt`
+
 Create a new JWT signed with the private key in `<file>`.
 
 ```text
@@ -170,7 +205,8 @@ Options:
   -c, --customerId  Customer Id                              [string] [required]
   -k, --keyId       Key Id                                   [string] [required]
   -v, --videoId     Video Id                                 [string] [required]
-  -m, --manifest    Manifest                                  [array] [required]
+  -m, --manifest    Manifest                                 [array] [required]
+  -r, --regexes     Array of regex                           [array] [optional]
   -x, --expiresIn   Expiration, as either (a) number of seconds or (b) a
                     duration string, eg. "3 days"            [string] [required]
   -n, --eventName   Event name                               [string] [optional]
@@ -183,6 +219,7 @@ hive-jwt-util create-jwt --file private-key.pem --partnerId 9001 --customerId 15
 ```
 
 ### `reporting-url`
+
 Display a URL to Hive Video Monitor
 
 ```text
