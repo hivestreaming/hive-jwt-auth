@@ -1,5 +1,9 @@
 import { promises, readFileSync } from 'fs';
 import { sign } from 'jsonwebtoken';
+import {
+    checkExpiresIn,
+    checkManifestOrArray
+} from '../utils/validation';
 
 /**
  * Helper class to create JWTs for authenticating with Hive services using the
@@ -61,8 +65,11 @@ export default class HiveJwtCreator {
      * string describing a time span [zeit/ms](https://github.com/zeit/ms.js).
      * Eg: 60, "2 days", "10h", "7d"
      * @param {string} eventName Event name
+     * @param {string[]} regexes List of regexes
      */
-    sign(keyId: string, customerId: string, videoId: string, manifests: string[], expiresIn: string | number, eventName?: string) {
+    sign(keyId: string, customerId: string, videoId: string, manifests: string[], expiresIn: string | number, eventName?: string, regexes?: string[]) {
+        const exp = typeof expiresIn === "string" ? checkExpiresIn(expiresIn) : expiresIn
+        const manifestOrRegex = checkManifestOrArray(manifests, regexes);
         const data = {
             "iss": this.partnerId,
             "sub": videoId,
@@ -70,13 +77,13 @@ export default class HiveJwtCreator {
             "aud": "https://hivestreaming.com",
             "cid": customerId,
             "evn": eventName,
-            "man": manifests
-        };
+            ...manifestOrRegex
+        }
 
         const token = sign(data, this.privateKey, {
             algorithm: 'RS256',
             keyid: keyId,
-            expiresIn
+            expiresIn: exp
         });
 
         return token;
@@ -93,6 +100,7 @@ export default class HiveJwtCreator {
      * @param {'test' | 'prod'} endpoint Endpoint in URL.
      */
      signReporting(keyId: string, customerId: string, videoId: string, expiresIn: string | number, endpoint: 'test' | 'prod' = 'prod') {
+        const exp = typeof expiresIn === "string" ? checkExpiresIn(expiresIn) : expiresIn
         const data = {
             "iss": this.partnerId,
             "sub": videoId,
@@ -105,7 +113,7 @@ export default class HiveJwtCreator {
         const token = sign(data, this.privateKey, {
             algorithm: 'RS256',
             keyid: keyId,
-            expiresIn
+            expiresIn: exp
         });
 
         return `https://api${endpoint === 'prod' ? '' : '-' + endpoint}.hivestreaming.com/v1/url-redirect/adminportal-jwt/${token}`;
