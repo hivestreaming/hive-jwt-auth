@@ -8,6 +8,9 @@ steps:
   inputs:
     workingFile: nodejs/.npmrc
     customEndpoint: npm registry readonly
-- script: npm ci
+- script: |
+  npm config set user 0
+  npm config set unsafe-perm true
+  npm ci
   displayName: Npm Install
   workingDirectory: nodejs
