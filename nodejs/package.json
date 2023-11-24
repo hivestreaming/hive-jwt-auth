@@ -7,7 +7,7 @@
     "hive-jwt-util": "./dist/cli/hive-jwt-util.js"
   },
   "scripts": {
-    "build": "npm run clean && tsc -b && chmod +x node_modules/typedoc/bin/typedoc && ./node_modules/typedoc/bin/typedoc src/lib/index.ts",
+    "build": "npm run clean && tsc -b && ./node_modules/typedoc/bin/typedoc src/lib/index.ts",
     "clean": "bash ./clean.sh",
     "prepack": "npm run build"
   },
