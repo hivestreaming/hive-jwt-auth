@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "npm run clean && tsc -b && chmod +x node_modules/typedoc/bin/typedoc && ./node_modules/typedoc/bin/typedoc src/lib/index.ts",
-    "clean": "bash ./clean.sh",
+    "clean": "rm -rf docs dist",
     "prepack": "npm run build"
   },
   "repository": {
