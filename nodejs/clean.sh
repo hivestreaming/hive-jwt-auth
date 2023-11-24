@@ -1,2 +1,2 @@
 #!/bin/bash
-rm -rf docs dist
+sudo rm -rf docs dist
