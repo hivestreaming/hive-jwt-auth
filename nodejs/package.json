@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "npm run clean && tsc -b && typedoc src/lib/index.ts",
-    "clean": "rimraf docs dist",
+    "clean": "bash ./clean.sh",
     "prepack": "npm run build"
   },
   "repository": {
