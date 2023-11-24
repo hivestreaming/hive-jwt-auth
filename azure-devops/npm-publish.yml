@@ -22,6 +22,7 @@ resources:
   - repository: pipelines
     type: github
     name: hivestreaming/azure-ci
+    ref: refs/heads/PTF-2030_migrate-to-azure-ci
     #     ref: refs/heads/EE-1_my-awesome-feature # pin to a specific branch during development
     endpoint: hivestreaming  # Azure DevOps service connection.
 
