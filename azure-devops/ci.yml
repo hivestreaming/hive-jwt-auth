@@ -3,11 +3,11 @@ trigger: none
 pr:
   branches:
     include:
-      - master
+    - master
 
 pool:
   vmImage: ubuntu-latest
 
 steps:
-  - template: templates/install.yml
-  - template: templates/build.yml
+- template: templates/install.yml
+- template: templates/build.yml

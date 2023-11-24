@@ -1,13 +1,14 @@
 steps:
-    - task: NodeTool@0
-      displayName: Use Node 16.x
-      inputs:
-        versionSpec: 16.x
-    - task: npmAuthenticate@0
-      displayName: Npm Authenticate
-      inputs:
-        workingFile: nodejs/.npmrc
-        customEndpoint: npm registry readonly
-    - script: npm ci
-      displayName: Npm Install
-      workingDirectory: nodejs
+- task: NodeTool@0
+  displayName: Use Node 18.x
+  inputs:
+    versionSpec: 18.x
+- task: npmAuthenticate@0
+  displayName: Npm Authenticate
+  inputs:
+    workingFile: nodejs/.npmrc
+    customEndpoint: npm registry readonly
+- script: |
+    npm ci
+  displayName: Npm Install
+  workingDirectory: nodejs

@@ -1,22 +1,22 @@
 steps:
-    - script: npm pack
-      displayName: Build and Pack
-      workingDirectory: nodejs
-    - task: CopyFiles@2
-      displayName: Copy Packed Artifact
-      inputs:
-        sourceFolder: nodejs
-        contents: '*.tgz'
-        targetFolder: package
-    - task: CopyFiles@2
-      displayName: Copy Docs
-      inputs:
-        sourceFolder: nodejs/docs
-        contents: '**/*'
-        targetFolder: docs
-    - publish: package
-      artifact: package
-      displayName: Publish Packed Artifact
-    - publish: docs
-      artifact: docs
-      displayName: Publish Docs
+- script: npm pack
+  displayName: Build and Pack
+  workingDirectory: nodejs
+- task: CopyFiles@2
+  displayName: Copy Packed Artifact
+  inputs:
+    sourceFolder: nodejs
+    contents: '*.tgz'
+    targetFolder: package
+- task: CopyFiles@2
+  displayName: Copy Docs
+  inputs:
+    sourceFolder: nodejs/docs
+    contents: '**/*'
+    targetFolder: docs
+- publish: package
+  artifact: package
+  displayName: Publish Packed Artifact
+- publish: docs
+  artifact: docs
+  displayName: Publish Docs

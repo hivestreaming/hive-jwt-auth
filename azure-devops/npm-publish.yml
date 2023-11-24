@@ -1,15 +1,36 @@
 trigger: none
 pr: none
 
-pool:
-  vmImage: ubuntu-latest
+name: publish-hive-jwt-auth-$(Date:yyyy-MM-dd)$(Rev:.r)
 
-steps:
-  - template: templates/install.yml
-  - task: Npm@1
-    displayName: NPM Publish
-    inputs:
-      command: publish
-      verbose: true
-      publishEndpoint: npm registry
-      workingDir: nodejs
+parameters:
+- name: versionBump
+  displayName: Version bump
+  type: string
+  values:
+  - Major
+  - Minor
+  - Bugfix
+  default: Minor
+- name: isSnapshot
+  displayName: Is snapshot?
+  type: boolean
+  default: true
+
+resources:
+  repositories:
+  - repository: pipelines
+    type: github
+    name: hivestreaming/azure-ci
+    #     ref: refs/heads/EE-1_my-awesome-feature # pin to a specific branch during development
+    endpoint: hivestreaming  # Azure DevOps service connection.
+
+extends:
+  template: templates/npm/publish-library.yml@pipelines
+  parameters:
+    versionBump: ${{ parameters.versionBump }}
+    isSnapshot: ${{ parameters.isSnapshot }}
+    useExistingTag: false
+    workingDirectory: nodejs
+    prePublish:
+    - template: templates/install.yml
