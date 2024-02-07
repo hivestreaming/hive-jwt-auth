@@ -1,7 +1,7 @@
-# hive-jwt-auth
+# Hive JWT Authentication
 
-This repository contains reference implementations for using JWTs to authorize
-against Hive Services with the Hive Plugin. Current reference implementations
-are provided in the following languages:
+This repository has been archived and is no longer actively maintained. For up-to-date examples and reference implementations on using JSON Web Tokens (JWTs) for authentication with Hive Services via the Hive Plugin, please visit the following link:
 
-- [Node.js](nodejs/README.md)
+https://github.com/hivestreaming/jwt-auth-examples
+
+We encourage you to explore the new repository for the latest guidance and support. Thank you for your interest in Hive JWT authentication.
